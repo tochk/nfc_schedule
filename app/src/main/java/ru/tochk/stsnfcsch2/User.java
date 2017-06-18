@@ -4,9 +4,11 @@ import android.util.JsonReader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Created by tochk on 6/18/2017.
@@ -18,10 +20,15 @@ class User {
     public String isStart;
 
     void getUserInfo(String cardId) throws IOException {
-        URL oracle = new URL("http://neptun.ptr.sgu.ru:4005/" + cardId);
-        BufferedReader in = new BufferedReader(new InputStreamReader(oracle.openStream()));
+        URL server = new URL("http", "neptun.ptr.sgu.ru", 4005, "submit/"+cardId);
+        InputStream in = server.openStream();
+        BufferedReader reader = new BufferedReader( new InputStreamReader( in )  );
 
-        JsonReader rdr = new JsonReader(in);
+        this.fullName = "Карта не найдена";
+        this.isStart = "notfound";
+        this.position = "Пожалуйста, обратитесь к администратору для регистрации карты";
+
+        JsonReader rdr = new JsonReader(reader);
         rdr.beginObject();
         while (rdr.hasNext()) {
             String name = rdr.nextName();

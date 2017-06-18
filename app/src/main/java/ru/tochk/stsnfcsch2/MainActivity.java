@@ -17,17 +17,17 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     private NfcAdapter nfcAdapter;
-    TextView textViewInfo;
-    TextView userViewInfo;
-    TextView positionViewInfo;
+    public TextView textViewInfo;
+    public TextView userViewInfo;
+    public TextView positionViewInfo;
+    public String tempTagFullClean;
+    public User user = new User();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textViewInfo = (TextView) findViewById(R.id.info);
-        userViewInfo = (TextView) findViewById(R.id.user);
-        positionViewInfo = (TextView) findViewById(R.id.position);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
             Toast.makeText(this,
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 byte[] tagId = tag.getId();
                 String tempTag = "";
                 String tempTagFull = "";
-                String tempTagFullClean = "";
+                tempTagFullClean = "";
                 for (byte aTagId : tagId) {
                     tempTag = Integer.toHexString(aTagId & 0xFF);
                     if (tempTag.length() == 1) {
@@ -69,26 +69,48 @@ public class MainActivity extends AppCompatActivity {
                         tempTag = "00";
                     }
                     tempTagFull += tempTag + ":";
-                    tempTagFullClean += tempTag;
+                    this.tempTagFullClean += tempTag;
                 }
                 tagInfo += "Идентификатор карты\n" + tempTagFull.substring(0, tempTagFull.length() - 1) + "\n\n";
 
 
                 textViewInfo.setText(tagInfo);
 
-                User user = new User();
+                Thread thread = new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            user.getUserInfo(tempTagFullClean);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                thread.start();
+
                 try {
-                    user.getUserInfo(tempTagFullClean);
-                } catch (IOException e) {
+                    thread.join();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                userViewInfo = (TextView) findViewById(R.id.user);
+                positionViewInfo = (TextView) findViewById(R.id.position);
                 userViewInfo.setText(user.fullName);
                 positionViewInfo.setText(user.position);
-                if (user.isStart.equals("true")) {
-                    positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
-                } else {
-                    positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                switch (user.isStart) {
+                    case "true":
+                        positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+                        break;
+                    case "false":
+                        positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_orange_light));
+                        break;
+                    case "notfound":
+                        positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                        break;
                 }
+
+
             }
         }
     }
