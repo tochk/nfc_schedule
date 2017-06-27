@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.blogspot.android_er.androidnfctagdiscovered.R;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public TextView positionViewInfo;
     public String tempTagFullClean;
     public User user = new User();
+    private String lastTag = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 String tagInfo = "";
 
                 byte[] tagId = tag.getId();
-                String tempTag = "";
+                String tempTag;
                 String tempTagFull = "";
                 tempTagFullClean = "";
                 for (byte aTagId : tagId) {
@@ -70,12 +72,23 @@ public class MainActivity extends AppCompatActivity {
                     }
                     tempTagFull += tempTag + ":";
                     this.tempTagFullClean += tempTag;
+
+
                 }
+
+                System.out.println(lastTag);
+                System.out.println(tempTagFullClean);
+
+                if (this.tempTagFullClean.equals(this.lastTag)) {
+                    return;
+                } else {
+                    this.lastTag = this.tempTagFullClean;
+                }
+
                 tagInfo += "Идентификатор карты\n" + tempTagFull.substring(0, tempTagFull.length() - 1) + "\n\n";
 
 
                 textViewInfo.setText(tagInfo);
-
                 Thread thread = new Thread(new Runnable() {
                     public void run() {
                         try {
@@ -115,4 +128,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+    }
 }
