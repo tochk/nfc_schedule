@@ -60,3 +60,4 @@ Temporary Items
 *.bat
 gradlew
 *.jar
+backend/conf.json
