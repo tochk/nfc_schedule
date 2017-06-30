@@ -20,7 +20,7 @@ class User {
     public String isStart;
 
     void getUserInfo(String cardId) throws IOException {
-        URL server = new URL("http", "neptun.ptr.sgu.ru", 4005, "submit/"+cardId);
+        URL server = new URL("http", "nfc.ssu.tochk.ru", 80, "submit/"+cardId);
         InputStream in = server.openStream();
         BufferedReader reader = new BufferedReader( new InputStreamReader( in )  );
 
