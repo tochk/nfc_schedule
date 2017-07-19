@@ -9,9 +9,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
+	"time"
+	"html/template"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"strings"
 )
 
 type server struct {
@@ -19,6 +21,7 @@ type server struct {
 }
 
 var (
+    datass,inct,dect int
 	configFile  = flag.String("Config", "conf.json", "Where to read the Config from")
 	servicePort = flag.Int("Port", 4005, "Application port")
 )
@@ -35,6 +38,14 @@ type UserInfo struct {
 	FullName string `db:"full_name"`
 	Position string `db:"position"`
 	IsStart  string `db:"is_start"`
+}
+type Statistic struct {
+	//Id       int `db:"id"`
+	//UserId   int `db:"userId"`
+	//StartTime string `db:"startTime"`
+	//EndTime  *string `db:"endTime"`
+	FullName  string `db:"fullName"`
+	Time  *string `db:"time"`
 }
 
 type UserStatus struct {
@@ -88,10 +99,62 @@ func (s *server) submitHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, "{\"full_name\": \""+user.FullName+"\",\"position\": \""+user.Position+"\",\"is_start\": \""+user.IsStart+"\"}")
 }
+//BigTuna
+func (s *server) testhandler(w http.ResponseWriter, r *http.Request){
+	statLen := r.URL.Path[len("/test/"):]
+	r.ParseForm()
+	post := r.PostForm
+	inc := strings.Join(post["inc"], "")
+	dec := strings.Join(post["dec"], "")
+	log.Println(inc)
+	log.Println(dec)
+	inct,_ =  strconv.Atoi(inc)
+	dect,_ =  strconv.Atoi(dec)
+	datass = datass + inct - dect
+	log.Println(datass)
+	log.Println(r.PostForm)
+	var temp time.Time
+	if statLen == ""  {
+		temp = time.Now()
+		temp = temp.AddDate(0,0,datass)
+		log.Println("hey", datass)
+		log.Println("hee", temp)
+		fmt.Println(temp)
+	} else {
+		temp,_ = time.Parse("2006-01-02", statLen)
+		//fmt.Println(temp)
+		//fmt.Println(statLen)
+		//fmt.Println(time.Parse("2006-01-02", statLen))
+	}
 
+	for temp.Weekday() != time.Monday {
+		temp = temp.Add(-time.Hour * 24)
+	}
+	//fmt.Println(temp)
+	stat := make([]Statistic, 0)
+	//kek := "2017-07-14"
+	if err := s.Db.Select(&stat, " SELECT (SELECT CONCAT(firstName, ' ', lastName) FROM users WHERE id = schedule.userId) as fullName , sum(TO_SECONDS(`endTime`) - TO_SECONDS(`startTime`)) / 3600 as time FROM schedule WHERE DATE(startTime)>=? GROUP BY userId;", temp.Format("2006-01-2")); err != nil {
+		log.Println(err)
+		return
+	}
+	testTemplate, err := template.ParseFiles("templates/test.html")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println()
+	if err := testTemplate.Execute(w, stat); err != nil {
+		log.Println(err)
+		return
+	}
+}
+//BigTunaEnd
 func main() {
 	flag.Parse()
-	loadConfig(*configFile)
+	err := loadConfig(*configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Println("Config loaded from " + *configFile)
 
 	s := server{
@@ -101,9 +164,10 @@ func main() {
 	log.Printf("Connected to database on %s", config.MysqlHost)
 
 	http.HandleFunc("/submit/", s.submitHandler)
+	http.HandleFunc("/test/", s.testhandler)
 
 	log.Print("Server started at port " + strconv.Itoa(*servicePort))
-	err := http.ListenAndServe(":"+strconv.Itoa(*servicePort), nil)
+	err = http.ListenAndServe(":"+strconv.Itoa(*servicePort), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
