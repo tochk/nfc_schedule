@@ -17,8 +17,8 @@
 
             // Create the data table.
             var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Topping');
-            data.addColumn('number', 'Slices');
+            data.addColumn('string', 'Full name');
+            data.addColumn('number', 'Hours of work');
             data.addRows([
                 {{ range .Statistics }}
             [{{ .FullName }}, {{ .Time }}],
@@ -26,8 +26,8 @@
         ]);
 
             // Set chart options
-            var options = {'title':'statistics',
-                'width':700,
+            var options = {'title':'Statistics',
+                'width':800,
                 'height':600};
 
             // Instantiate and draw our chart, passing in some options.
