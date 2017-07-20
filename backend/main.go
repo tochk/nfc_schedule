@@ -40,7 +40,7 @@ type UserInfo struct {
 }
 type Statistics struct {
 	FullName string `db:"fullName"`
-	Time     *string `db:"time"`
+	Time     *float64 `db:"time"`
 }
 
 type UserStatus struct {
@@ -138,6 +138,8 @@ func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	stat = sortUsersByTime(stat)
+
 	if err := testTemplate.Execute(w, StatisticsPage{
 		Statistics: stat,
 		PrevDate:   pageDate.Add(-time.Hour * 24 * 7).Format("2006-01-02"),
@@ -146,6 +148,20 @@ func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+}
+
+func sortUsersByTime(stat []Statistics) []Statistics {
+	for i := 0; i < len(stat); i++ {
+		for j := 0; j < i; j++ {
+			if stat[j].Time == nil || stat[i].Time == nil {
+				continue
+			}
+			if *stat[j].Time < *stat[i].Time {
+				stat[i], stat[j] = stat[j], stat[i]
+			}
+		}
+	}
+	return stat
 }
 
 func main() {
