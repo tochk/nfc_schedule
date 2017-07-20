@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
-	"html/template"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"strings"
 )
 
 type server struct {
@@ -21,9 +22,9 @@ type server struct {
 }
 
 var (
-    datass,inct,dect int
-	configFile  = flag.String("Config", "conf.json", "Where to read the Config from")
-	servicePort = flag.Int("Port", 4005, "Application port")
+	datass, inct, dect int
+	configFile         = flag.String("Config", "conf.json", "Where to read the Config from")
+	servicePort        = flag.Int("Port", 4005, "Application port")
 )
 
 var config struct {
@@ -44,8 +45,8 @@ type Statistic struct {
 	//UserId   int `db:"userId"`
 	//StartTime string `db:"startTime"`
 	//EndTime  *string `db:"endTime"`
-	FullName  string `db:"fullName"`
-	Time  *string `db:"time"`
+	FullName string `db:"fullName"`
+	Time     *string `db:"time"`
 }
 
 type UserStatus struct {
@@ -99,8 +100,9 @@ func (s *server) submitHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, "{\"full_name\": \""+user.FullName+"\",\"position\": \""+user.Position+"\",\"is_start\": \""+user.IsStart+"\"}")
 }
+
 //BigTuna
-func (s *server) testhandler(w http.ResponseWriter, r *http.Request){
+func (s *server) testhandler(w http.ResponseWriter, r *http.Request) {
 	statLen := r.URL.Path[len("/test/"):]
 	r.ParseForm()
 	post := r.PostForm
@@ -108,20 +110,20 @@ func (s *server) testhandler(w http.ResponseWriter, r *http.Request){
 	dec := strings.Join(post["dec"], "")
 	log.Println(inc)
 	log.Println(dec)
-	inct,_ =  strconv.Atoi(inc)
-	dect,_ =  strconv.Atoi(dec)
+	inct, _ = strconv.Atoi(inc)
+	dect, _ = strconv.Atoi(dec)
 	datass = datass + inct - dect
 	log.Println(datass)
 	log.Println(r.PostForm)
 	var temp time.Time
-	if statLen == ""  {
+	if statLen == "" {
 		temp = time.Now()
-		temp = temp.AddDate(0,0,datass)
+		temp = temp.AddDate(0, 0, datass)
 		log.Println("hey", datass)
 		log.Println("hee", temp)
 		fmt.Println(temp)
 	} else {
-		temp,_ = time.Parse("2006-01-02", statLen)
+		temp, _ = time.Parse("2006-01-02", statLen)
 		//fmt.Println(temp)
 		//fmt.Println(statLen)
 		//fmt.Println(time.Parse("2006-01-02", statLen))
@@ -148,6 +150,7 @@ func (s *server) testhandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 }
+
 //BigTunaEnd
 func main() {
 	flag.Parse()
