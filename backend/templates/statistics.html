@@ -20,7 +20,7 @@
             data.addColumn('string', 'Topping');
             data.addColumn('number', 'Slices');
             data.addRows([
-                {{ range . }}
+                {{ range .Statistics }}
             [{{ .FullName }}, parseFloat({{ .Time }})],
             {{end}}
         ]);
@@ -38,18 +38,11 @@
 </head>
 
 <body>
-<form method="post">
-    <input type="text" name="date">
-    <input type="submit" value="Перейти">
-</form>
-<form method="post">
-    <input type="hidden" name="dec" value="7">
-    <input type="submit" value="back">
-</form>
-<form method="post">
-    <input type="hidden" name="inc" value="7">
-    <input type="submit" value="forward">
-</form>
+
+<a href="/statistics/{{.PrevDate}}">{{.PrevDate}}</a>
+
+<a href="/statistics/{{.NextDate}}">{{.NextDate}}</a>
+
 <!--Div that will hold the pie chart-->
 
 

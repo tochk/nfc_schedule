@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -22,9 +21,8 @@ type server struct {
 }
 
 var (
-	datass, inct, dect int
-	configFile         = flag.String("Config", "conf.json", "Where to read the Config from")
-	servicePort        = flag.Int("Port", 4005, "Application port")
+	configFile  = flag.String("Config", "conf.json", "Where to read the Config from")
+	servicePort = flag.Int("Port", 4005, "Application port")
 )
 
 var config struct {
@@ -40,17 +38,19 @@ type UserInfo struct {
 	Position string `db:"position"`
 	IsStart  string `db:"is_start"`
 }
-type Statistic struct {
-	//Id       int `db:"id"`
-	//UserId   int `db:"userId"`
-	//StartTime string `db:"startTime"`
-	//EndTime  *string `db:"endTime"`
+type Statistics struct {
 	FullName string `db:"fullName"`
 	Time     *string `db:"time"`
 }
 
 type UserStatus struct {
 	Id int `db:"id"`
+}
+
+type StatisticsPage struct {
+	Statistics []Statistics
+	NextDate string
+	PrevDate string
 }
 
 func loadConfig(path string) error {
@@ -101,57 +101,45 @@ func (s *server) submitHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "{\"full_name\": \""+user.FullName+"\",\"position\": \""+user.Position+"\",\"is_start\": \""+user.IsStart+"\"}")
 }
 
-//BigTuna
-func (s *server) testhandler(w http.ResponseWriter, r *http.Request) {
-	statLen := r.URL.Path[len("/test/"):]
-	r.ParseForm()
-	post := r.PostForm
-	inc := strings.Join(post["inc"], "")
-	dec := strings.Join(post["dec"], "")
-	log.Println(inc)
-	log.Println(dec)
-	inct, _ = strconv.Atoi(inc)
-	dect, _ = strconv.Atoi(dec)
-	datass = datass + inct - dect
-	log.Println(datass)
-	log.Println(r.PostForm)
-	var temp time.Time
-	if statLen == "" {
-		temp = time.Now()
-		temp = temp.AddDate(0, 0, datass)
-		log.Println("hey", datass)
-		log.Println("hee", temp)
-		fmt.Println(temp)
+func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Loaded %s page from %s", r.URL.Path, r.RemoteAddr)
+	date := r.URL.Path[len("/statistics/"):]
+	var err error
+	var pageDate time.Time
+	if date == "" {
+		pageDate = time.Now()
 	} else {
-		temp, _ = time.Parse("2006-01-02", statLen)
-		//fmt.Println(temp)
-		//fmt.Println(statLen)
-		//fmt.Println(time.Parse("2006-01-02", statLen))
+		pageDate, err = time.Parse("2006-01-02", date)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 
-	for temp.Weekday() != time.Monday {
-		temp = temp.Add(-time.Hour * 24)
+	for pageDate.Weekday() != time.Monday {
+		pageDate = pageDate.Add(-time.Hour * 24)
 	}
-	//fmt.Println(temp)
-	stat := make([]Statistic, 0)
-	//kek := "2017-07-14"
-	if err := s.Db.Select(&stat, " SELECT (SELECT CONCAT(firstName, ' ', lastName) FROM users WHERE id = schedule.userId) as fullName , sum(TO_SECONDS(`endTime`) - TO_SECONDS(`startTime`)) / 3600 as time FROM schedule WHERE DATE(startTime)>=? GROUP BY userId;", temp.Format("2006-01-2")); err != nil {
+	stat := make([]Statistics, 0)
+	if err := s.Db.Select(&stat, " SELECT (SELECT CONCAT(firstName, ' ', lastName) FROM users WHERE id = schedule.userId) as fullName , sum(TO_SECONDS(`endTime`) - TO_SECONDS(`startTime`)) / 3600 as time FROM schedule WHERE DATE(startTime) >= ? AND DATE(startTime) <= ? GROUP BY userId;", pageDate.Format("2006-01-02"), pageDate.Add(time.Hour * 24 * 6).Format("2006-01-02")); err != nil {
 		log.Println(err)
 		return
 	}
-	testTemplate, err := template.ParseFiles("templates/test.html")
+	testTemplate, err := template.ParseFiles("templates/statistics.html")
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	fmt.Println()
-	if err := testTemplate.Execute(w, stat); err != nil {
+
+	if err := testTemplate.Execute(w, StatisticsPage{
+		Statistics: stat,
+		PrevDate: pageDate.Add(-time.Hour * 24 * 7).Format("2006-01-02"),
+		NextDate: pageDate.Add(time.Hour * 24 * 7).Format("2006-01-02"),
+	}); err != nil {
 		log.Println(err)
 		return
 	}
 }
 
-//BigTunaEnd
 func main() {
 	flag.Parse()
 	err := loadConfig(*configFile)
@@ -167,7 +155,7 @@ func main() {
 	log.Printf("Connected to database on %s", config.MysqlHost)
 
 	http.HandleFunc("/submit/", s.submitHandler)
-	http.HandleFunc("/test/", s.testhandler)
+	http.HandleFunc("/statistics/", s.statisticsHandler)
 
 	log.Print("Server started at port " + strconv.Itoa(*servicePort))
 	err = http.ListenAndServe(":"+strconv.Itoa(*servicePort), nil)
