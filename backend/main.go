@@ -33,10 +33,10 @@ var config struct {
 }
 
 type UserInfo struct {
-	Id       int `db:"id"`
-	FullName string `db:"full_name"`
-	Position string `db:"position"`
-	IsStart  string `db:"is_start"`
+	Id       int `db:"id" json:"id"`
+	FullName string `db:"full_name" json:"full_name"`
+	Position string `db:"position" json:"position"`
+	IsStart  string `db:"is_start" json:"is_start"`
 }
 type Statistics struct {
 	FullName string `db:"fullName"`
@@ -49,8 +49,11 @@ type UserStatus struct {
 
 type StatisticsPage struct {
 	Statistics []Statistics
-	NextDate string
-	PrevDate string
+	NextDate   string
+	PrevDate   string
+}
+
+type SubmitData struct {
 }
 
 func loadConfig(path string) error {
@@ -98,7 +101,12 @@ func (s *server) submitHandler(w http.ResponseWriter, r *http.Request) {
 		user.IsStart = "false"
 	}
 
-	fmt.Fprint(w, "{\"full_name\": \""+user.FullName+"\",\"position\": \""+user.Position+"\",\"is_start\": \""+user.IsStart+"\"}")
+	if result, err := json.Marshal(user); err != nil {
+		log.Println(err)
+		return
+	} else {
+		fmt.Fprintf(w, string(result))
+	}
 }
 
 func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
@@ -132,8 +140,8 @@ func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := testTemplate.Execute(w, StatisticsPage{
 		Statistics: stat,
-		PrevDate: pageDate.Add(-time.Hour * 24 * 7).Format("2006-01-02"),
-		NextDate: pageDate.Add(time.Hour * 24 * 7).Format("2006-01-02"),
+		PrevDate:   pageDate.Add(-time.Hour * 24 * 7).Format("2006-01-02"),
+		NextDate:   pageDate.Add(time.Hour * 24 * 7).Format("2006-01-02"),
 	}); err != nil {
 		log.Println(err)
 		return
