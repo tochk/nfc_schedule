@@ -151,11 +151,15 @@ func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sortUsersByTime(stat []Statistics) []Statistics {
-	for i := 0; i < len(stat); i++ {
+	newStat := make([]Statistics, 0)
+	for _, e := range stat {
+		if e.Time != nil {
+			newStat = append(newStat, e)
+		}
+	}
+	stat = newStat
+	for i := range stat {
 		for j := 0; j < i; j++ {
-			if stat[j].Time == nil || stat[i].Time == nil {
-				continue
-			}
 			if *stat[j].Time < *stat[i].Time {
 				stat[i], stat[j] = stat[j], stat[i]
 			}
