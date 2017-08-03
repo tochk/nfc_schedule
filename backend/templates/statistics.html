@@ -27,25 +27,43 @@
 
             // Set chart options
             var options = {'title':'Statistics',
-                'width':800,
-                'height':600};
+                'width':"100%",
+            'height':800,
+            'backgroundColor': { fill:'transparent' }};
 
             // Instantiate and draw our chart, passing in some options.
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
             chart.draw(data, options);
         }
     </script>
+    <title>Служебная записка - ПРЦНИТ СГУ</title>
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/ripples.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap-material-design.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/template.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
 
-<a href="/statistics/{{.PrevDate}}">{{.PrevDate}}</a>
-
-<a href="/statistics/{{.NextDate}}">{{.NextDate}}</a>
-
+<div id="blurr">
+    <div class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">Statistics</a>
+            </div>
+            <div class="nav navbar-nav">
+                <li><a href="/statistics/">Current week</a></li>
+                <li><a href="/statistics/{{.PrevDate}}">{{.PrevDate}}</a></li>
+                <li class="active"><a href="/statistics/{{.CurrentDate}}">{{.CurrentDate}}</a></li>
+                <li><a href="/statistics/{{.NextDate}}">{{.NextDate}}</a></li>
+            </div>
+        </div>
+    </div>
 <!--Div that will hold the pie chart-->
+        <div id="chart_div"></div>
+</div>
 
-
-<div id="chart_div"></div>
 </body>
 </html>

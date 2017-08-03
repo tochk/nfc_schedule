@@ -50,6 +50,7 @@ type UserStatus struct {
 type StatisticsPage struct {
 	Statistics []Statistics
 	NextDate   string
+	CurrentDate   string
 	PrevDate   string
 }
 
@@ -143,6 +144,7 @@ func (s *server) statisticsHandler(w http.ResponseWriter, r *http.Request) {
 	if err := testTemplate.Execute(w, StatisticsPage{
 		Statistics: stat,
 		PrevDate:   pageDate.Add(-time.Hour * 24 * 7).Format("2006-01-02"),
+		CurrentDate:pageDate.Format("2006-01-02"),
 		NextDate:   pageDate.Add(time.Hour * 24 * 7).Format("2006-01-02"),
 	}); err != nil {
 		log.Println(err)
@@ -193,7 +195,8 @@ func main() {
 	}
 	defer s.Db.Close()
 	log.Printf("Connected to database on %s", config.MysqlHost)
-
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/submit/", s.submitHandler)
 	http.HandleFunc("/statistics/", s.statisticsHandler)
 
