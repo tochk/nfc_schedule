@@ -168,6 +168,18 @@ func sortUsersByTime(stat []Statistics) []Statistics {
 	return stat
 }
 
+
+func (s *server) clearDate() {
+	for {
+		if time.Now().Hour() == 22 {
+			if _, err := s.Db.Exec("UPDATE schedule SET endTime = startTime WHERE endTime IS NULL"); err != nil {
+				log.Println(err)
+			}
+		}
+		time.Sleep(time.Hour * 1)
+	}
+}
+
 func main() {
 	flag.Parse()
 	err := loadConfig(*configFile)
@@ -184,6 +196,8 @@ func main() {
 
 	http.HandleFunc("/submit/", s.submitHandler)
 	http.HandleFunc("/statistics/", s.statisticsHandler)
+
+	go s.clearDate()
 
 	log.Print("Server started at port " + strconv.Itoa(*servicePort))
 	err = http.ListenAndServe(":"+strconv.Itoa(*servicePort), nil)
