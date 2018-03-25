@@ -1,4 +1,4 @@
-package ru.tochk.stsnfcsch2;
+package ru.tochk.nfc_schedule;
 
 import android.util.JsonReader;
 
