@@ -3,52 +3,62 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:orientation="vertical"
-    tools:context="ru.tochk.stsnfcsch2.MainActivity"
-    android:weightSum="1">
+    android:layout_height="match_parent">
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/progress_bar"
+        android:visibility="gone"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/main_ll"
+        android:padding="16dp"
+        android:orientation="vertical"
+        tools:context="ru.tochk.nfc_schedule.MainActivity"
+        android:weightSum="1">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_gravity="center_horizontal"
+            android:autoLink="web"
+            android:text="@string/give_card"
+            android:textStyle="bold"
+            android:textSize="35sp"
+            android:layout_weight="0.13" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_gravity="center_horizontal"
-        android:autoLink="web"
-        android:text="Приложите карту"
-        android:textStyle="bold"
-        android:textSize="35dp"
-        android:layout_weight="0.13" />
+        <TextView
+            android:id="@+id/info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:autoLink="web"
+            android:textSize="20sp"
+            android:textAlignment="center"
+            android:layout_weight="0.13" />
 
-    <TextView
-        android:id="@+id/info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:autoLink="web"
-        android:textSize="20dp"
-        android:textAlignment="center"
-        android:layout_weight="0.13" />
+        <TextView
+            android:id="@+id/user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:autoLink="web"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:layout_weight="0.13" />
 
-    <TextView
-        android:id="@+id/user"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:autoLink="web"
-        android:textSize="30dp"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        android:layout_weight="0.13" />
+        <TextView
+            android:id="@+id/position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:autoLink="web"
+            android:textSize="25sp"
+            android:textAlignment="center"
+            android:layout_weight="0.13" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/position"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:autoLink="web"
-        android:textSize="25dp"
-        android:textAlignment="center"
-        android:layout_weight="0.13" />
 
 </LinearLayout>

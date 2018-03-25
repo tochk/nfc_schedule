@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Система учёта рабочего времени</string>
+    <string name="give_card">Приложите карту</string>
 </resources>
