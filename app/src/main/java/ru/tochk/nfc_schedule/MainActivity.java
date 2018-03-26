@@ -51,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
                 TextView userViewInfo = findViewById(R.id.user);
                 TextView positionViewInfo = findViewById(R.id.position);
                 userViewInfo.setText(b.getString("fullName"));
-                positionViewInfo.setText(b.getString("isStart"));
+                positionViewInfo.setText(b.getString("position"));
                 textViewInfo.setText("Идентификатор карты\n" + b.getString("tag") + "\n\n");
-                switch (b.getString("position")) {
+                switch (b.getString("isStart")) {
                     case "true":
                         positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
                         break;
