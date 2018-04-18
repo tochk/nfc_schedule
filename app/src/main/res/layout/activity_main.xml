@@ -3,18 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
     <ProgressBar
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/progress_bar"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/main_ll"
         android:padding="16dp"
         android:orientation="vertical"
+        android:visibility="gone"
         tools:context="ru.tochk.nfc_schedule.MainActivity"
         android:weightSum="1">
         <TextView

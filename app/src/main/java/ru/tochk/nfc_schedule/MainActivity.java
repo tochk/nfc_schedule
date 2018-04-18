@@ -21,7 +21,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     public TextView textViewInfo;
@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ProgressBar progressBar = findViewById(R.id.progress_bar);
+        LinearLayout main = findViewById(R.id.main_ll);
         textViewInfo = findViewById(R.id.info);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 userViewInfo.setText(b.getString("fullName"));
                 positionViewInfo.setText(b.getString("position"));
                 textViewInfo.setText("Идентификатор карты\n" + b.getString("tag") + "\n\n");
-                switch (b.getString("isStart")) {
+                switch (Objects.requireNonNull(b.getString("isStart"))) {
                     case "true":
                         positionViewInfo.getRootView().setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
                         break;
@@ -65,13 +67,9 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
-        } else {
-            ProgressBar progressBar = findViewById(R.id.progress_bar);
-            LinearLayout main = findViewById(R.id.main_ll);
-            progressBar.setVisibility(View.VISIBLE);
-            main.setVisibility(View.GONE);
         }
-
+        progressBar.setVisibility(View.GONE);
+        main.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("SetTextI18n")
@@ -166,8 +164,10 @@ public class MainActivity extends AppCompatActivity {
             b.putString("position", this.position);
             b.putString("isStart", this.isStart);
             b.putString("tag", this.tag);
-            intent.putExtras(b);
-            startActivity(intent);
+            if (this.tag != null) {
+                intent.putExtras(b);
+                startActivity(intent);
+            }
         }
     }
 
