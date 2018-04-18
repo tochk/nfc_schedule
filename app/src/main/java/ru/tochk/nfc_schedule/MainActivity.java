@@ -65,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
+        } else {
+            ProgressBar progressBar = findViewById(R.id.progress_bar);
+            LinearLayout main = findViewById(R.id.main_ll);
+            progressBar.setVisibility(View.VISIBLE);
+            main.setVisibility(View.GONE);
         }
 
     }
